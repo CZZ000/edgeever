@@ -56,11 +56,6 @@ const isMissingObjectError = (error: unknown) => {
     || candidate.$metadata?.httpStatusCode === 404;
 };
 
-const totalSizeFromContentRange = (contentRange: string | undefined) => {
-  const match = /\/(\d+)$/.exec(contentRange ?? "");
-  return match ? Number(match[1]) : null;
-};
-
 const createS3BlobStore = (
   config: S3CompatibleStorageConfig,
   client = new S3Client({
@@ -72,14 +67,9 @@ const createS3BlobStore = (
       : undefined,
   }),
 ): BlobStoreAdapter => ({
-  async get(objectKey, options): Promise<BlobObjectAdapter | null> {
+  async get(objectKey): Promise<BlobObjectAdapter | null> {
     try {
-      const range = options?.range;
-      const result = await client.send(new GetObjectCommand({
-        Bucket: config.bucket,
-        Key: objectKey,
-        Range: range ? `bytes=${range.offset}-${range.offset + range.length - 1}` : undefined,
-      }));
+      const result = await client.send(new GetObjectCommand({ Bucket: config.bucket, Key: objectKey }));
       if (!result.Body) {
         return null;
       }
@@ -87,8 +77,7 @@ const createS3BlobStore = (
       const body = await toWebStream(result.Body);
       return {
         body,
-        size: totalSizeFromContentRange(result.ContentRange) ?? result.ContentLength ?? 0,
-        range: range ? { offset: range.offset, length: result.ContentLength ?? range.length } : undefined,
+        size: result.ContentLength ?? 0,
         writeHttpMetadata: (headers) => {
           if (result.ContentType) headers.set("Content-Type", result.ContentType);
           if (result.CacheControl) headers.set("Cache-Control", result.CacheControl);
