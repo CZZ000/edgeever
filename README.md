@@ -338,4 +338,3 @@ EdgeEver is self-hosted software. Except for official demo instances, project ma
   <a href="https://github.com/Shunamxiao"><img src="https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/92215296?v=4&h=96&w=96&fit=cover&mask=circle&maxage=7d" width="48" height="48" alt="@Shunamxiao" /></a>
 </p>
 <!-- readme-contributors:end -->
-
